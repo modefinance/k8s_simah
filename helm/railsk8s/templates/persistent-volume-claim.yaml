@@ -1,0 +1,20 @@
+{{- if .Values.persistentVolume.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "railsk8s.fullname" . }}-pv-claim
+  labels:
+    {{- include "railsk8s.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-3"
+    helm.sh/resource-policy: keep
+    {{- with .Values.persistentVolume.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if and .Values.persistentVolume.customVolume .Values.persistentVolume.customVolume.enabled }}
+  volumeName: {{ include "railsk8s.fullname" . }}-pv
+  {{- end }}
+  {{- toYaml .Values.persistentVolume.specs | nindent 2 }}
+{{- end }}
